@@ -1,0 +1,9 @@
+.shootingArea {
+  border-right: 1px solid #b7b9d0;
+  height: 100vh;
+  width: calc(100vw - 200px);
+  background-color: #ffffff;
+  opacity: 0.7;
+  background-image: radial-gradient(#b7b9d0 1px, #ffffff 1px);
+  background-size: 20px 20px;
+}
