@@ -39,6 +39,8 @@ export class ShootingAreaComponent implements AfterViewInit {
 
     return hit / (hit + miss) || 0;
   })
+  readonly startAudio = new Audio('assets/countdown-sound.wav');
+  readonly stopAudio = new Audio('assets/finish.wav');
   readonly difficulties = [
     { label: 'Easy (3600ms/target)', value: Difficulty.Easy },
     { label: 'Medium (2400ms/target)', value: Difficulty.Medium },
@@ -52,9 +54,8 @@ export class ShootingAreaComponent implements AfterViewInit {
 
   start() {
     this.countdown.set(3);
-    const audio = new Audio('assets/countdown-sound.wav');
-    audio.volume = 0.2;
-    audio.play()
+    this.startAudio.volume = 0.2;
+    this.startAudio.play()
 
     interval(1000)
       .pipe(
@@ -74,9 +75,8 @@ export class ShootingAreaComponent implements AfterViewInit {
   }
 
   stop() {
-    const audio = new Audio('assets/finish.wav');
-    audio.volume = 0.2;
-    audio.play()
+    this.stopAudio.volume = 0.2;
+    this.stopAudio.play()
 
     this.shootingAreaService.stop();
   }
