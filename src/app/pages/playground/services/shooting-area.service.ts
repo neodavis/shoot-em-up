@@ -52,7 +52,7 @@ export class ShootingAreaService {
       )
         .pipe(
           filter(() => !!this._shootingArea),
-          map(() => this.getTarget()),
+          map(() => this.createTarget()),
           tap((target: ShootingArea.Target) => this._targets$.update(targets => [...targets, target])),
         );
 
@@ -90,7 +90,7 @@ export class ShootingAreaService {
     this._stopwatch.set(0);
   }
 
-  private getTarget(): ShootingArea.Target {
+  private createTarget(): ShootingArea.Target {
     const svgNS = "http://www.w3.org/2000/svg";
     const target = document.createElementNS(svgNS, 'circle');
     const maxX = this._shootingArea!.clientWidth;
@@ -109,7 +109,8 @@ export class ShootingAreaService {
 
     this._shootingArea!.appendChild(target);
 
-    requestAnimationFrame(() => target.style.r = (10).toString());
+    // TODO: avoid setTimeout (need to fix bug with wrong size on first render)
+    setTimeout(() => target.style.r = (10).toString(), 100);
 
     const missAfterLifetime = setTimeout(() => {
       this.missTarget();
