@@ -1,13 +1,25 @@
-import { AfterViewInit, Component, computed, ElementRef, HostListener, inject, signal, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  HostListener,
+  inject,
+  signal,
+  ViewChild
+} from '@angular/core';
 import { ShootingAreaService } from '../../services/shooting-area.service';
 import { ShootingArea } from '../../models/shooting-area.model';
-import Difficulty = ShootingArea.Difficulty;
 import { Button } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
 import { TagModule } from 'primeng/tag';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DatePipe, PercentPipe } from '@angular/common';
-import { interval, startWith, take, tap } from 'rxjs';
+import { interval, take, tap } from 'rxjs';
+import { InputNumberModule } from 'primeng/inputnumber';
+import Difficulty = ShootingArea.Difficulty;
+import Mode = ShootingArea.Mode;
 
 @Component({
   selector: 'app-shooting-area',
@@ -19,14 +31,21 @@ import { interval, startWith, take, tap } from 'rxjs';
     FormsModule,
     ReactiveFormsModule,
     PercentPipe,
-    DatePipe
+    DatePipe,
+    InputNumberModule
   ],
   templateUrl: './shooting-area.component.html',
   styleUrl: './shooting-area.component.scss',
   providers: [ShootingAreaService],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShootingAreaComponent implements AfterViewInit {
   @ViewChild('shootingArea') shootingArea!: ElementRef<SVGElement>;
+
+  @HostListener('window:keydown.space', ['$event'])
+  listenBindings() {
+    this.running() ? this.stop() :this.start();
+  }
 
   private readonly shootingAreaService = inject(ShootingAreaService);
 
@@ -35,18 +54,31 @@ export class ShootingAreaComponent implements AfterViewInit {
   readonly running = this.shootingAreaService.running;
   readonly countdown = signal<number | null>(null);
   readonly ratio = computed(() => {
+    const { hit, lost } = this.statistics()
+
+    return hit / (hit + lost) || 0;
+  })
+  readonly accuracy = computed(() => {
     const { hit, miss } = this.statistics()
 
     return hit / (hit + miss) || 0;
   })
+  readonly Mode = Mode;
   readonly startAudio = new Audio('assets/countdown-sound.wav');
-  readonly stopAudio = new Audio('assets/finish.wav');
   readonly difficulties = [
     { label: 'Easy (3600ms/target)', value: Difficulty.Easy },
     { label: 'Medium (2400ms/target)', value: Difficulty.Medium },
     { label: 'Hard (1800ms/target)', value: Difficulty.Hard },
   ];
   readonly difficultyControl = new FormControl<Difficulty>(Difficulty.Easy);
+  readonly timerControl = new FormControl<number>(60);
+  readonly targetScoreControl = new FormControl<number>(100);
+  readonly modeControl = new FormControl<Mode>(Mode.Endless);
+  readonly modes = [
+    { label: 'Timer', value: Mode.Timer },
+    { label: 'Endless', value: Mode.Endless },
+    { label: 'Fixed Count', value: Mode.FixedCount },
+  ];
 
   ngAfterViewInit() {
     this.shootingAreaService.initializeArea(this.shootingArea.nativeElement);
@@ -64,7 +96,12 @@ export class ShootingAreaComponent implements AfterViewInit {
           const transformedValue = 2 - value;
 
           if (transformedValue === 0) {
-            this.shootingAreaService.start(this.difficultyControl.value!);
+            this.shootingAreaService.start({
+              mode: this.modeControl.value!,
+              difficulty: this.difficultyControl.value!,
+              timer: this.timerControl.value!,
+              targetScore: this.targetScoreControl.value!
+            });
             this.countdown.set(null);
           } else {
             this.countdown.set(transformedValue);
@@ -75,9 +112,6 @@ export class ShootingAreaComponent implements AfterViewInit {
   }
 
   stop() {
-    this.stopAudio.volume = 0.2;
-    this.stopAudio.play()
-
     this.shootingAreaService.stop();
   }
 
