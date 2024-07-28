@@ -1,7 +1,5 @@
-
-
-<div class="flex justify-center w-full">
-  <div class="shootingArea relative">
+<div class="flex justify-center w-full" [ngStyle]="viewSettings()">
+  <div class="shootingArea relative" >
     <svg #shootingArea (click)="shoot($event)" class="w-full h-full"></svg>
     @if (countdown()) {
       <div class="rounded-full w-32 text-center text-white bg-orange-400 absolute center top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-9xl z-50">
@@ -17,6 +15,21 @@
           <p-tag value="Shooting Area" class="flex"></p-tag>
         </h1>
         <p class="text-s">Shoot and hit as many targets as you can!</p>
+      </li>
+      <li>
+        <p-button
+          severity="primary"
+          styleClass="w-full"
+          class="w-full"
+          (click)="openViewSettings()"
+        >
+          <i class="pi pi-palette mr-2"></i>
+          View Settings
+          <span class="ml-auto flex items-center gap-1 border-1 bg-blue-400 rounded text-xs p-1">
+            <i class="pi pi-bolt"></i>
+            Alt + S
+          </span>
+        </p-button>
       </li>
       <li>
         <p class="font-semibold">Statistics:</p>
@@ -115,5 +128,25 @@
     </ul>
   </aside>
 </div>
+
+<p-dialog
+  header="View Settings"
+  [modal]="true"
+  [(visible)]="showViewSettings"
+  [draggable]="false"
+  (onHide)="hideViewSettings()"
+>
+  <table>
+    <tr>
+      <td>
+        <span class="text-nowrap pr-2">Accent color:</span>
+      </td>
+      <td>
+        <p-colorPicker [(ngModel)]="accentColor" format="hex"></p-colorPicker>
+      </td>
+      <!-- TODO: implement other customizations (f.e dark/light mode) -->
+    </tr>
+  </table>
+</p-dialog>
 
 

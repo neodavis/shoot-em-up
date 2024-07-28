@@ -15,11 +15,13 @@ import { Button } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
 import { TagModule } from 'primeng/tag';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { DatePipe, PercentPipe } from '@angular/common';
+import { DatePipe, NgStyle, PercentPipe } from '@angular/common';
 import { interval, take, tap } from 'rxjs';
 import { InputNumberModule } from 'primeng/inputnumber';
 import Difficulty = ShootingArea.Difficulty;
 import Mode = ShootingArea.Mode;
+import { DialogModule } from 'primeng/dialog';
+import { ColorPickerModule } from 'primeng/colorpicker';
 
 @Component({
   selector: 'app-shooting-area',
@@ -32,23 +34,31 @@ import Mode = ShootingArea.Mode;
     ReactiveFormsModule,
     PercentPipe,
     DatePipe,
-    InputNumberModule
+    InputNumberModule,
+    DialogModule,
+    ColorPickerModule,
+    NgStyle
   ],
   templateUrl: './shooting-area.component.html',
   styleUrl: './shooting-area.component.scss',
   providers: [ShootingAreaService],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShootingAreaComponent implements AfterViewInit {
   @ViewChild('shootingArea') shootingArea!: ElementRef<SVGElement>;
 
   @HostListener('window:keydown.space', ['$event'])
-  listenBindings() {
+  toggleShootingArea() {
     this.running() ? this.stop() :this.start();
+  }
+
+  @HostListener('window:keydown.alt.s', ['$event'])
+  toggleViewSettings() {
+    this.showViewSettings.set(true);
   }
 
   private readonly shootingAreaService = inject(ShootingAreaService);
 
+  readonly showViewSettings = signal<boolean>(false);
   readonly statistics = this.shootingAreaService.statistics;
   readonly stopwatch = this.shootingAreaService.stopwatch;
   readonly running = this.shootingAreaService.running;
@@ -79,6 +89,10 @@ export class ShootingAreaComponent implements AfterViewInit {
     { label: 'Endless', value: Mode.Endless },
     { label: 'Fixed Count', value: Mode.FixedCount },
   ];
+  accentColor = signal<string>('#b7b9d0');
+  viewSettings = computed(() => ({
+    '--accent-color': this.accentColor(),
+  }));
 
   ngAfterViewInit() {
     this.shootingAreaService.initializeArea(this.shootingArea.nativeElement);
@@ -123,5 +137,13 @@ export class ShootingAreaComponent implements AfterViewInit {
     } else {
       this.shootingAreaService.missTarget();
     }
+  }
+
+  openViewSettings() {
+    this.showViewSettings.set(true);
+  }
+
+  hideViewSettings() {
+    this.showViewSettings.set(false);
   }
 }

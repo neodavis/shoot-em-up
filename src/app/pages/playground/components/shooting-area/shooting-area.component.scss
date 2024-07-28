@@ -1,9 +1,17 @@
 .shootingArea {
-  border-right: 1px solid #b7b9d0;
+  border-right: 1px dotted var(--accent-color);
   height: 100vh;
   width: calc(100vw - 200px);
-  background-color: #ffffff;
-  opacity: 0.7;
-  background-image: radial-gradient(#b7b9d0 1px, #ffffff 1px);
+  background-image: radial-gradient(var(--accent-color) 1px, white 1px);
   background-size: 20px 20px;
+}
+
+:host ::ng-deep {
+  .p-dialog-content {
+    overflow: visible;
+  }
+
+  .p-colorpicker-preview {
+    width: 200px;
+  }
 }
