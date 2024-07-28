@@ -21,10 +21,11 @@
       <li>
         <p class="font-semibold">Statistics:</p>
         @if (running() || stopwatch()) {
-          <ul class="pl-2">
+          <ul class="pl-4 list-disc">
             <li>Stopwatch: {{ stopwatch() }}s</li>
             <li>Targets hit: {{ statistics().hit }} ({{ ratio() | percent }})</li>
-            <li>Miss count: {{ statistics().miss }}</li>
+            <li>Targets lost: {{ statistics().lost }}</li>
+            <li>Accuracy: {{ accuracy() | percent }}</li>
           </ul>
         } @else {
           You have no active statistic to show.
@@ -36,15 +37,79 @@
           class="w-full"
           styleClass="w-full"
           appendTo="body"
+          [disabled]="running()"
           [options]="difficulties"
           [formControl]="difficultyControl"
         ></p-dropdown>
       </li>
       <li>
+        <p class="font-semibold">Select mode:</p>
+        <p-dropdown
+          class="w-full"
+          styleClass="w-full"
+          appendTo="body"
+          [disabled]="running()"
+          [options]="modes"
+          [formControl]="modeControl"
+        ></p-dropdown>
+      </li>
+      @if (modeControl.value === Mode.FixedCount) {
+        <li>
+          <p class="font-semibold">Select target count:</p>
+          <p-inputNumber
+            mode="decimal"
+            class="w-full"
+            styleClass="w-full"
+            [disabled]="running()"
+            [min]="0"
+            [max]="100"
+            [formControl]="targetScoreControl"
+          />
+        </li>
+      }
+
+      @if (modeControl.value === Mode.Timer) {
+        <li>
+          <p class="font-semibold">Select timer:</p>
+          <p-inputNumber
+            mode="decimal"
+            class="w-full"
+            styleClass="w-full"
+            [disabled]="running()"
+            [min]="0"
+            [formControl]="timerControl"
+          />
+        </li>
+      }
+      <li>
         @if (running()) {
-          <p-button (click)="stop()" severity="danger" styleClass="w-full flex justify-center" class="w-full">Stop</p-button>
+          <p-button
+            severity="danger"
+            styleClass="w-full"
+            class="w-full"
+            (click)="stop()"
+          >
+            <i class="pi pi-stop-circle mr-2"></i>
+            Stop
+            <span class="ml-auto border-1 bg-red-400 rounded text-xs p-1">
+              <i class="pi pi-bolt"></i>
+              Space
+            </span>
+          </p-button>
         } @else if (!countdown()) {
-          <p-button (click)="start()" severity="primary" styleClass="w-full flex justify-center" class="w-full">Start</p-button>
+          <p-button
+            severity="primary"
+            styleClass="w-full"
+            class="w-full"
+            (click)="start()"
+          >
+            <i class="pi pi-stopwatch mr-2"></i>
+            Start
+            <span class="ml-auto flex items-center gap-1 border-1 bg-blue-400 rounded text-xs p-1">
+              <i class="pi pi-bolt"></i>
+              Space
+            </span>
+          </p-button>
         }
       </li>
     </ul>
